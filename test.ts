@@ -1,6 +1,4 @@
-const DATA_NUM = 100;
-
-await createData();
+import { DATA_NUM } from "./create-data.ts";
 
 Deno.test({
   name: "sync function",
@@ -12,7 +10,6 @@ Deno.test({
     console.timeEnd("readFileSync");
   },
 });
-
 Deno.test({
   name: "async function",
   fn: async () => {
@@ -24,31 +21,15 @@ Deno.test({
 });
 
 async function readFileSync(i: number) {
-  await new Promise((resolve) => {
-    resolve("");
+  // console.log(`reading data ${i} by sync`);
+  await new Promise<void>((resolve) => {
+    Deno.readFileSync(`./data-sync/${i}.json`);
+    return resolve();
   });
-  Deno.readFileSync(`./data/${i}.json`);
+  // console.log(`read data ${i} by sync`);
 }
 async function readFileAsync(i: number) {
-  await new Promise((resolve) => {
-    resolve("");
-  });
-  await Deno.readFile(`./data/${i}.json`);
-}
-
-async function createData() {
-  try {
-    Deno.removeSync("data", { recursive: true });
-  } catch (_) {}
-  try {
-    Deno.mkdir("data");
-  } catch (_) {}
-  const data = new Array(10000).fill(0).map((_) => crypto.randomUUID());
-
-  console.log("creating data...");
-  const funcs = new Array(DATA_NUM).fill(0).map((_, i) =>
-    Deno.writeTextFile(`./data/${i}.json`, JSON.stringify(data))
-  );
-  await Promise.all(funcs);
-  console.log("created data");
+  // console.log(`reading data ${i} by async`);
+  await Deno.readFile(`./data-async/${i}.json`);
+  // console.log(`read data ${i} by async`);
 }
